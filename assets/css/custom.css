@@ -1,0 +1,13 @@
+/**
+ *
+ * Apply Here your Custom CSS
+ *
+*/
+
+body {
+	
+}
+@media print {
+    th { font-size: 16px !important; }
+    td { font-size: 16px !important; }
+}
