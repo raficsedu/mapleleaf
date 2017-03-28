@@ -322,6 +322,8 @@
             || $page_name == 'collection_summary'
             || $page_name == 'individual_student_collection'
             || $page_name == 'all_student_collection'
+            || $page_name == 'paid_students'
+            || $page_name == 'unpaid_students'
             || $page_name == 'cancel_receipt'
             || $page_name == 'refund_receipt'
             )
@@ -360,6 +362,16 @@
                     <li class="<?php if ($page_name == 'all_student_collection') echo 'active'; ?> ">
                         <a href="<?php echo base_url(); ?>index.php?admin/report/all_student_collection">
                             <span><i class="entypo-dot"></i> <?php echo get_phrase('All Student Collection'); ?></span>
+                        </a>
+                    </li>
+                    <li class="<?php if ($page_name == 'paid_students') echo 'active'; ?> ">
+                        <a href="<?php echo base_url(); ?>index.php?admin/report/paid_students">
+                            <span><i class="entypo-dot"></i> <?php echo get_phrase('Paid Students'); ?></span>
+                        </a>
+                    </li>
+                    <li class="<?php if ($page_name == 'unpaid_students') echo 'active'; ?> ">
+                        <a href="<?php echo base_url(); ?>index.php?admin/report/unpaid_students">
+                            <span><i class="entypo-dot"></i> <?php echo get_phrase('Un-Paid Students'); ?></span>
                         </a>
                     </li>
                     <li class="<?php if ($page_name == 'cancel_receipt') echo 'active'; ?> ">

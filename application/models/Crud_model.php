@@ -33,6 +33,12 @@ class Crud_model extends CI_Model {
         return $query->result_array();
     }
 
+    function get_student_id_by_roll($student_roll) {
+        $sql = "SELECT student_id FROM student WHERE roll='$student_roll' AND deleted='0'";
+        $query = $this->db->query($sql);
+        return $query->row();
+    }
+
     /////////PARENT//////////////
     function get_parent_info($parent_id) {
         $query = $this->db->get_where('parent', array('parent_id' => $parent_id));

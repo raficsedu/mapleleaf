@@ -174,13 +174,13 @@
         <table class="table table-bordered datatable" id="table_export">
             <thead>
             <tr>
-                <th><div><?php echo get_phrase('Student ID');?></div></th>
-                <th><div><?php echo get_phrase('Student Name');?></div></th>
-                <th><div><?php echo get_phrase('Pay Date');?></div></th>
-                <th><div><?php echo get_phrase('Receipt No');?></div></th>
-                <th><div><?php echo get_phrase('Fee Amount');?></div></th>
-                <th><div><?php echo get_phrase('VAT (%)');?></div></th>
-                <th><div><?php echo get_phrase('VAT Total');?></div></th>
+                <th><?php echo get_phrase('Student ID');?></th>
+                <th><?php echo get_phrase('Student Name');?></th>
+                <th><?php echo get_phrase('Pay Date');?></th>
+                <th><?php echo get_phrase('Receipt No');?></th>
+                <th><?php echo get_phrase('Fee Amount');?></th>
+                <th><?php echo get_phrase('VAT (%)');?></th>
+                <th><?php echo get_phrase('VAT Total');?></th>
             </tr>
             </thead>
             <tbody>

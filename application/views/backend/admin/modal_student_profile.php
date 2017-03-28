@@ -256,6 +256,15 @@ foreach ( $edit_data as $row):
     </div>
 
     <div class="form-group">
+        <label for="field-2" class="col-sm-3 control-label"><?php echo get_phrase('Yearly Fee');?></label>
+
+        <div class="col-sm-5">
+            <input type="checkbox" name="yearly_fee[]" value="admission" <?php if($row['admission']) echo 'checked';?> disabled> Admission Fee<br>
+            <input type="checkbox" name="yearly_fee[]" value="evaluation" <?php if($row['evaluation']) echo 'checked';?> disabled> Evaluation Fee
+        </div>
+    </div>
+
+    <div class="form-group">
         <label for="field-2" class="col-sm-3 control-label"><?php echo get_phrase('Parent/Student Status');?></label>
 
         <div class="col-sm-5 control-info">

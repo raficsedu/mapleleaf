@@ -123,11 +123,11 @@
         <table class="table table-bordered datatable" id="table_export">
             <thead>
             <tr>
-                <th><div><?php echo get_phrase('Session');?></div></th>
-                <th><div><?php echo get_phrase('Total Tuition Fees');?></div></th>
-                <th><div><?php echo get_phrase('Total Others Fees');?></div></th>
-                <th><div><?php echo get_phrase('Total VAT');?></div></th>
-                <th><div><?php echo get_phrase('Net Collection');?></div></th>
+                <th><?php echo get_phrase('Session');?></th>
+                <th><?php echo get_phrase('Total Tuition Fees');?></th>
+                <th><?php echo get_phrase('Total Others Fees');?></th>
+                <th><?php echo get_phrase('Total VAT');?></th>
+                <th><?php echo get_phrase('Net Collection');?></th>
             </tr>
             </thead>
             <tbody>

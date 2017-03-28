@@ -54,15 +54,15 @@
         <table class="table table-bordered datatable" id="table_export">
             <thead>
             <tr>
-                <th><div><?php echo get_phrase('Student ID');?></div></th>
-                <th><div><?php echo get_phrase('Name');?></div></th>
-                <th><div><?php echo get_phrase('Description');?></div></th>
-                <th><div><?php echo get_phrase('Pay Date');?></div></th>
-                <th><div><?php echo get_phrase('Receipt No');?></div></th>
-                <th><div><?php echo get_phrase('Month From');?></div></th>
-                <th><div><?php echo get_phrase('Month To');?></div></th>
-                <th><div><?php echo get_phrase('Amount');?></div></th>
-                <th><div><?php echo get_phrase('Remark');?></div></th>
+                <th><?php echo get_phrase('Student ID');?></th>
+                <th><?php echo get_phrase('Name');?></th>
+                <th><?php echo get_phrase('Description');?></th>
+                <th><?php echo get_phrase('Pay Date');?></th>
+                <th><?php echo get_phrase('Receipt No');?></th>
+                <th><?php echo get_phrase('Month From');?></th>
+                <th><?php echo get_phrase('Month To');?></th>
+                <th><?php echo get_phrase('Amount');?></th>
+                <th><?php echo get_phrase('Remark');?></th>
             </tr>
             </thead>
             <tbody>
@@ -72,7 +72,7 @@
                 $total_refund = ($total_refund>0) ? $total_refund : 0;
                 $total_vat = 0;
                 $months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-                foreach($payments as $payment):
+                foreach($payments as $payment){
                     //getting payment items
                     $payment_id = $payment['payment_id'];
                     $sql = "SELECT * FROM payment_items WHERE payment_id='$payment_id'";
@@ -82,8 +82,10 @@
                     //Looping the output
                     foreach($payment_items as $item){
                         if($item['item_name']=='Monthly Fee'){
-                            $m_from = $months[intval($payment['month_from'])-1];
-                            $m_to = $months[intval($payment['month_to'])-1];
+                            $f = (intval($payment['month_from']) % 12 == 0) ? 12 : (intval($payment['month_from']) % 12);
+                            $t = (intval($payment['month_to']) % 12 == 0) ? 12 : (intval($payment['month_to']) % 12);
+                            $m_from = $months[$f-1];
+                            $m_to = $months[$t-1];
                         }else{
                             $m_from = '';
                             $m_to = '';
@@ -104,7 +106,7 @@
                     }
                     $total_amount += $payment['total_amount'];
                     $total_collection += $payment['total_receivable'];
-                endforeach;
+                }
 
                 //Printing bottom Final row
                 echo '

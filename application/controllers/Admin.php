@@ -137,7 +137,7 @@ class Admin extends CI_Controller
             }
             foreach($stuforpromo as $s){
                 $cnt++;
-                //$status = $this->get_payment_stauts($s);
+                //$status = $this->get_payment_status($s);
                 $status = 1;
                 $current_students = $this->get_current_numbers_of_students($to_section_id,$to_year);
                 $capacity = ($current_students<$seat_capacity) ? 1 : 0;
@@ -347,6 +347,17 @@ class Admin extends CI_Controller
                 $data['c_lab']       = 1;
                 $data['p_lab']       = 1;
             }
+            $data['admission']       = 0;
+            $data['evaluation']       = 0;
+            if(sizeof($_POST['yearly_fee']) > 0){
+                foreach($_POST['yearly_fee'] as $yf){
+                    if($yf == "admission"){
+                        $data['admission']       = 1;
+                    }else if($yf == "evaluation"){
+                        $data['evaluation']       = 1;
+                    }
+                }
+            }
             $data['s_vat']       = $this->input->post('vat');
             $data['total']       = $this->input->post('total');
             $data['s_session']       = $this->input->post('s_session');
@@ -485,6 +496,17 @@ class Admin extends CI_Controller
             }else if($this->input->post('lab') == 4){
                 $data['c_lab']       = 1;
                 $data['p_lab']       = 1;
+            }
+            $data['admission']       = 0;
+            $data['evaluation']       = 0;
+            if(sizeof($_POST['yearly_fee']) > 0){
+                foreach($_POST['yearly_fee'] as $yf){
+                    if($yf == "admission"){
+                        $data['admission']       = 1;
+                    }else if($yf == "evaluation"){
+                        $data['evaluation']       = 1;
+                    }
+                }
             }
             $data['s_vat']       = $this->input->post('vat');
             $data['total']       = $this->input->post('total');
@@ -1045,11 +1067,12 @@ class Admin extends CI_Controller
         }
     }
 
-    function get_students_payment_stauts_by_id($student_id)
+    function get_students_payment_status_by_id($student_id)
     {
         $student_id = str_replace('-','/',$student_id);
         $students = $this->db->get_where('student' , array(
-            'roll' => $student_id
+            'roll' => $student_id,
+            'deleted' => 0
         ))->row();
         //print_r($students);
         $id = $students->student_id;
@@ -1058,6 +1081,8 @@ class Admin extends CI_Controller
 
         $special_admission_fee = $students->special_admission_fee;
         $special_evaluation_fee = $students->special_evaluation_fee;
+        $special_c_lab_fee = $students->special_c_lab_fee;
+        $special_p_lab_fee = $students->special_p_lab_fee;
 
         $mf_waiver = $students->mf_waiver;
         $ad_waiver = $students->ad_waiver;
@@ -1076,6 +1101,9 @@ class Admin extends CI_Controller
             }
         }else if($s_session=='07'){
             $from_month = $students->payment_month_start_from;
+            if($from_month <= 6){
+                $from_month = $from_month + 12 ;
+            }
             $to_month = date('m');
             $ttt = explode('-',$students->year);
             $from_year = $ttt[0];
@@ -1085,6 +1113,8 @@ class Admin extends CI_Controller
                 $to_month = 18;
             }else if($to_year == date('Y')){
                 $to_month = $to_month + 12;
+            }else{
+                $to_month = 18;
             }
         }
 
@@ -1098,13 +1128,20 @@ class Admin extends CI_Controller
         $fine_date = $this->db->get_where('settings', array('type' => 'fine_date'))->row()->description;
 
         //Checking for the tuition fee paid or not
+        $is_increased = 0;
+        if($from_month > 12){
+            $from_year++;
+            $is_increased = 1;
+        }
         while($from_month<=$to_month && $from_year<=$to_year){
             $m = $from_month%12;
             if($m==0){
                 $m = 12;
             }
             if($from_month==13){
-                $from_year++;
+                if($is_increased == 0){
+                    $from_year++;
+                }
             }
             //Searching
             if($m<10){
@@ -1214,10 +1251,18 @@ class Admin extends CI_Controller
                 $ttt = explode('-',$year);
                 $year = $ttt[0];
                 $i = $students->payment_month_start_from;
+                if($i <= 6){
+                    $i = $i + 12;
+                }
+                $is_increased = 0;
+                if($i > 12){
+                    $year++;
+                    $is_increased = 1;
+                }
                 for(;$i<=18;$i++){
                     $mm = $i%12;
                     if($mm==0){$mm=12;}
-                    if($i==13){$year++;}
+                    if($i==13){if($is_increased == 0){$year++;}}
                     if($mm<10){
                         $school_fee = $this->db->get_where('school_fee' , array(
                             'student_id' => $id,
@@ -1399,30 +1444,54 @@ class Admin extends CI_Controller
                 $evaluation_fee = $academic_fees->ev;
             }
         }
-        //C Lab Waver
-        if($c_lab_waiver > 0){
-            if($c_lab_waiver == 100){
-                $c_lab_fee = 0;
+        //Special C Lab and Waver
+        if($special_c_lab_fee > 0){
+            if($c_lab_waiver > 0){
+                if($c_lab_waiver == 100){
+                    $c_lab_fee = 0;
+                }else{
+                    $c_lab_fee = $special_c_lab_fee*$c_lab_waiver/100;
+                }
             }else{
-                $c_lab_fee = $academic_fees->c_lab*$c_lab_waiver/100;
+                $c_lab_fee = $special_c_lab_fee;
             }
         }else{
-            $c_lab_fee = $academic_fees->c_lab;
+            if($c_lab_waiver > 0){
+                if($c_lab_waiver == 100){
+                    $c_lab_fee = 0;
+                }else{
+                    $c_lab_fee = $academic_fees->c_lab*$c_lab_waiver/100;
+                }
+            }else{
+                $c_lab_fee = $academic_fees->c_lab;
+            }
         }
-        //P Lab Waver
-        if($p_lab_waiver > 0){
-            if($p_lab_waiver == 100){
-                $p_lab_fee = 0;
+        //Special P Lab and Waver
+        if($special_p_lab_fee > 0){
+            if($p_lab_waiver > 0){
+                if($p_lab_waiver == 100){
+                    $p_lab_fee = 0;
+                }else{
+                    $p_lab_fee = $special_p_lab_fee*$p_lab_waiver/100;
+                }
             }else{
-                $p_lab_fee = $academic_fees->p_lab*$p_lab_waiver/100;
+                $p_lab_fee = $special_p_lab_fee;
             }
         }else{
-            $p_lab_fee = $academic_fees->p_lab;
+            if($p_lab_waiver > 0){
+                if($p_lab_waiver == 100){
+                    $p_lab_fee = 0;
+                }else{
+                    $p_lab_fee = $academic_fees->p_lab*$p_lab_waiver/100;
+                }
+            }else{
+                $p_lab_fee = $academic_fees->p_lab;
+            }
         }
 
         $data.= '~';
         if($status==1){
-            if($admission_status==0){
+            if($admission_status==0 && $students->admission){
                 $data.= '<tr id="admission_fee">
                         <td><button class="close admission_fee" style="width: 15%;float: left"><img src="'.base_url().'assets/images/close.png"></button><input style="width: 85%;float: left" class="form-control h_input" name="add_fee_nameadmission_fee" id="add_fee_nameadmission_fee" value="Admission Fee" autofocus="" readonly="" type="text"></td>
                         <td></td>
@@ -1436,7 +1505,7 @@ class Admin extends CI_Controller
                      </tr>';
             }
         }
-        if($evaluation_status==0){
+        if($evaluation_status==0 && $students->evaluation){
             $data.= '<tr id="evaluation_fee">
                         <td><button class="close evaluation_fee" style="width: 15%;float: left"><img src="'.base_url().'assets/images/close.png"></button><input style="width: 85%;float: left" class="form-control h_input" name="add_fee_nameevaluation_fee" id="add_fee_nameevaluation_fee" value="Evaluation Fee" autofocus="" readonly="" type="text"></td>
                         <td></td>
@@ -1481,7 +1550,8 @@ class Admin extends CI_Controller
 
     function get_fine_status($from='',$to='',$id=''){
         $students = $this->db->get_where('student' , array(
-            'student_id' => $id
+            'student_id' => $id,
+            'deleted' => 0
         ))->row();
 
         $s_session = $students->s_session;
@@ -1504,13 +1574,20 @@ class Admin extends CI_Controller
         $fine_date = $this->db->get_where('settings', array('type' => 'fine_date'))->row()->description;
 
         //Checking for the tuition fee paid or not
+        $year_already_incremented = 0;
+        if($from_month > 12){
+            $year_already_incremented = 1;
+            $from_year++;
+        }
         while($from_month<=$to_month && $from_year<=$to_year){
             $m = $from_month%12;
             if($m==0){
                 $m = 12;
             }
             if($from_month==13){
-                $from_year++;
+                if($year_already_incremented == 0){
+                    $from_year++;
+                }
             }
             //Searching
             if($m<10){
@@ -2155,6 +2232,11 @@ class Admin extends CI_Controller
 
                 $m_from = intval($_POST['month_from']);
                 $m_to = intval($_POST['month_to']);
+                $is_year_incremented = 0;
+                if($m_from > 12){
+                    $is_year_incremented = 1;
+                    $year = $year + 1;
+                }
                 for($i = $m_from;$i<= $m_to;$i++){
                     $school_fee['student_id'] = $this->input->post('student_real_id');
                     $school_fee['payment_id'] = $payment_id;
@@ -2164,7 +2246,9 @@ class Admin extends CI_Controller
                         $m=12;
                     }
                     if($i==13){
-                        $year = $year + 1;
+                        if($is_year_incremented == 0){
+                            $year = $year + 1;
+                        }
                     }
                     if($m<10 && $m>0){
                         $school_fee['month'] = '0'.$m;
@@ -2172,7 +2256,7 @@ class Admin extends CI_Controller
                         $school_fee['month'] = $m;
                     }
                     $school_fee['year'] = $year;
-                    $school_fee['fee'] = $this->input->post('fee_total');
+                    $school_fee['fee'] = $this->input->post('real_monthly_fee');
                     $school_fee['date'] = $this->input->post('date');
                     $school_fee['deleted'] = 0;
 
@@ -2485,6 +2569,11 @@ class Admin extends CI_Controller
 
                 $m_from = intval($_POST['month_from']);
                 $m_to = intval($_POST['month_to']);
+                $is_year_incremented = 0;
+                if($m_from > 12){
+                    $is_year_incremented = 1;
+                    $year = $year + 1;
+                }
                 for($i = $m_from;$i<= $m_to;$i++){
                     $school_fee['student_id'] = $this->input->post('student_real_id');
                     $school_fee['payment_id'] = $payment_id;
@@ -2494,7 +2583,9 @@ class Admin extends CI_Controller
                         $m=12;
                     }
                     if($i==13){
-                        $year = $year + 1;
+                        if($is_year_incremented == 0){
+                            $year = $year + 1;
+                        }
                     }
                     if($m<10 && $m>0){
                         $school_fee['month'] = '0'.$m;
@@ -2502,7 +2593,7 @@ class Admin extends CI_Controller
                         $school_fee['month'] = $m;
                     }
                     $school_fee['year'] = $year;
-                    $school_fee['fee'] = $this->input->post('fee_total');
+                    $school_fee['fee'] = $this->input->post('real_monthly_fee');
                     $school_fee['date'] = $this->input->post('date');
                     $school_fee['deleted'] = 0;
 
@@ -3820,11 +3911,11 @@ class Admin extends CI_Controller
             $session = $_POST['session'];
 
 
-            $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE YEAR(payment.timestamp)= '$session' AND student.roll='$roll' AND payment.payment_type='1' AND payment.deleted='0'";
+            $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE payment.payment_year= '$session' AND student.roll='$roll' AND payment.payment_type='1' AND payment.deleted='0'";
             $query = $this->db->query($sql);
             $payments = $query->result_array();
 
-            $sql = "SELECT SUM(payment.total_amount) AS total_refund FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE YEAR(payment.timestamp)= '$session' AND student.roll='$roll' AND payment.payment_type='2' AND payment.deleted='0'";
+            $sql = "SELECT SUM(payment.total_amount) AS total_refund FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE payment.payment_year= '$session' AND student.roll='$roll' AND payment.payment_type='2' AND payment.deleted='0'";
             $query = $this->db->query($sql);
             $total_refund = $query->row();
 
@@ -3871,6 +3962,108 @@ class Admin extends CI_Controller
 
             $page_data['page_name']  = 'all_student_collection';
             $page_data['page_title'] = get_phrase('Report-All Student Collection');
+            $page_data['payments']  = $payments;
+            $this->load->view('backend/index', $page_data);
+        }
+        else if($report_name=='paid_students'){
+            $branch = $_POST['branch_info'];
+            $month = $_POST['month'];
+            $year = $_POST['year'];
+            $building = $_POST['building_info'];
+            $class_id = $_POST['class_id'];
+            $section_id = $_POST['section_id'];
+            $gender = $_POST['gender'];
+            $session = $_POST['session'];
+
+            if($session == "07"){
+                $t = explode('-',$year);
+                if(intval($month) <= 6){
+                    $year = $t[1];
+                }else{
+                    $year = $t[0];
+                }
+            }
+
+            $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND school_fee.month='$month' AND school_fee.year='$year'";
+
+
+            if($branch!=''){
+                $sql.= " AND payment.branch_id='$branch'";
+            }
+            if($building!=''){
+                $sql.= " AND payment.building_id='$building'";
+            }
+            if($class_id!=''){
+                $sql.= " AND student.class_id='$class_id'";
+            }
+            if($section_id!=''){
+                $sql.= " AND student.section_id='$section_id'";
+            }
+            if($gender!=''){
+                $sql.= " AND student.gender='$gender'";
+            }
+            if($session!=''){
+                $sql.= " AND student.s_session='$session'";
+            }
+
+            $sql.= " GROUP BY student.student_id";
+
+            $query = $this->db->query($sql);
+            $payments = $query->result_array();
+
+            $page_data['page_name']  = 'paid_students';
+            $page_data['page_title'] = get_phrase('Report-Paid Students');
+            $page_data['payments']  = $payments;
+            $this->load->view('backend/index', $page_data);
+        }
+        else if($report_name=='unpaid_students'){
+            $branch = $_POST['branch_info'];
+            $month = intval($_POST['month']);
+            $year = $_POST['year'];
+            $building = $_POST['building_info'];
+            $class_id = $_POST['class_id'];
+            $section_id = $_POST['section_id'];
+            $gender = $_POST['gender'];
+            $session = $_POST['session'];
+
+            if($session == "07"){
+                $t = explode('-',$year);
+                if($month <= 6){
+                    $year = $t[1];
+                }else{
+                    $year = $t[0];
+                }
+            }
+
+            $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll,MAX(school_fee.month) AS month FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND CAST(school_fee.month AS UNSIGNED)<'$month' AND school_fee.year='$year'";
+
+
+            if($branch!=''){
+                $sql.= " AND payment.branch_id='$branch'";
+            }
+            if($building!=''){
+                $sql.= " AND payment.building_id='$building'";
+            }
+            if($class_id!=''){
+                $sql.= " AND student.class_id='$class_id'";
+            }
+            if($section_id!=''){
+                $sql.= " AND student.section_id='$section_id'";
+            }
+            if($gender!=''){
+                $sql.= " AND student.gender='$gender'";
+            }
+            if($session!=''){
+                $sql.= " AND student.s_session='$session'";
+            }
+
+            $sql.= " GROUP BY student.student_id";
+
+            $query = $this->db->query($sql);
+            $payments = $query->result_array();
+
+            $page_data['page_name']  = 'unpaid_students';
+            $page_data['page_title'] = get_phrase('Report-Un-Paid Students');
             $page_data['payments']  = $payments;
             $this->load->view('backend/index', $page_data);
         }
@@ -4084,7 +4277,7 @@ class Admin extends CI_Controller
 
         $html = '';
         foreach($students as $s){
-            $status = $this->get_payment_stauts($s['student_id']);
+            $status = $this->get_payment_status($s['student_id']);
             if($status){
                 $html.= '<p class="p_success"><input type="checkbox" name="stuforpromo[]" value="'.$s['student_id'].'">'.'  '.$s['name'].' ('.$s['roll'].')'.' </p>';
             }else{
@@ -4097,7 +4290,7 @@ class Admin extends CI_Controller
         print_r($html);
     }
 
-    function get_payment_stauts($student_id)
+    function get_payment_status($student_id)
     {
         $students = $this->db->get_where('student' , array(
             'student_id' => $student_id
@@ -4328,14 +4521,29 @@ class Admin extends CI_Controller
          */
         if(isset($sSearch) && !empty($sSearch))
         {
-            for($i=0; $i<count($aColumns); $i++)
-            {
-                $bSearchable = $this->input->get_post('bSearchable_'.$i, true);
+            $is_jan_roll = stripos($sSearch,"JAN");
+            $is_jul_roll = stripos($sSearch,"JUL");
+            if((isset($is_jan_roll) && $is_jan_roll > -1) || (isset($is_jul_roll) && $is_jul_roll > -1)){
+                $student_info = $this->crud_model->get_student_id_by_roll($sSearch);
+                $sSearch = $student_info->student_id;
+                $bSearchable = $this->input->get_post('bSearchable_1', true);
 
                 // Individual column filtering
                 if(isset($bSearchable) && $bSearchable == 'true')
                 {
-                    $this->db->or_like($aColumns[$i], $this->db->escape_like_str($sSearch));
+                    //$this->db->like('student_id', $this->db->escape_like_str($sSearch));
+                    $this->db->where('student_id', $this->db->escape_like_str($sSearch));
+                }
+            }else{
+                for($i=0; $i<count($aColumns); $i++)
+                {
+                    $bSearchable = $this->input->get_post('bSearchable_'.$i, true);
+
+                    // Individual column filtering
+                    if(isset($bSearchable) && $bSearchable == 'true')
+                    {
+                        $this->db->or_like($aColumns[$i], $this->db->escape_like_str($sSearch));
+                    }
                 }
             }
         }

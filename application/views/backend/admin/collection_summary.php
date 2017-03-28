@@ -179,21 +179,21 @@
         <table class="table table-bordered datatable" id="table_export">
             <thead>
             <tr>
-                <th><div><?php echo get_phrase('Date');?></div></th>
-                <th><div><?php echo get_phrase('TUI Fee');?></div></th>
-                <th><div><?php echo get_phrase('EVA Fee');?></div></th>
-                <th><div><?php echo get_phrase('ADM Fee');?></div></th>
-                <th><div><?php echo get_phrase('C.Lab');?></div></th>
-                <th><div><?php echo get_phrase('P.Lab');?></div></th>
-                <th><div><?php echo get_phrase('RE Adm');?></div></th>
-                <th><div><?php echo get_phrase('ADM Form');?></div></th>
-                <th><div><?php echo get_phrase('TC');?></div></th>
-                <th><div><?php echo get_phrase('Total without VAT');?></div></th>
-                <th><div><?php echo get_phrase('VAT');?></div></th>
-                <th><div><?php echo get_phrase('Total with VAT');?></div></th>
-                <th><div><?php echo get_phrase('Total Payment');?></div></th>
-                <th><div><?php echo get_phrase('Total Refund');?></div></th>
-                <th><div><?php echo get_phrase('Net Collection');?></div></th>
+                <th><?php echo get_phrase('Date');?></th>
+                <th><?php echo get_phrase('TUI Fee');?></th>
+                <th><?php echo get_phrase('EVA Fee');?></th>
+                <th><?php echo get_phrase('ADM Fee');?></th>
+                <th><?php echo get_phrase('C.Lab');?></th>
+                <th><?php echo get_phrase('P.Lab');?></th>
+                <th><?php echo get_phrase('RE Adm');?></th>
+                <th><?php echo get_phrase('ADM Form');?></th>
+                <th><?php echo get_phrase('TC');?></th>
+                <th><?php echo get_phrase('Total without VAT');?></th>
+                <th><?php echo get_phrase('VAT');?></th>
+                <th><?php echo get_phrase('Total with VAT');?></th>
+                <th><?php echo get_phrase('Total Payment');?></th>
+                <th><?php echo get_phrase('Total Refund');?></th>
+                <th><?php echo get_phrase('Net Collection');?></th>
             </tr>
             </thead>
             <tbody>

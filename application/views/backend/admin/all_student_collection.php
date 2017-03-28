@@ -176,17 +176,17 @@
         <table class="table table-bordered datatable" id="table_export">
             <thead>
             <tr>
-                <th><div><?php echo get_phrase('Student ID');?></div></th>
-                <th><div><?php echo get_phrase('Student Name');?></div></th>
-                <th><div><?php echo get_phrase('Class');?></div></th>
-                <th><div><?php echo get_phrase('Section');?></div></th>
-                <th><div><?php echo get_phrase('Pay Date');?></div></th>
-                <th><div><?php echo get_phrase('Receipt No');?></div></th>
-                <th><div><?php echo get_phrase('Month From');?></div></th>
-                <th><div><?php echo get_phrase('Month To');?></div></th>
-                <th><div><?php echo get_phrase('Fee Name');?></div></th>
-                <th><div><?php echo get_phrase('Amount');?></div></th>
-                <th><div><?php echo get_phrase('Remark');?></div></th>
+                <th><?php echo get_phrase('Student ID');?></th>
+                <th><?php echo get_phrase('Student Name');?></th>
+                <th><?php echo get_phrase('Class');?></th>
+                <th><?php echo get_phrase('Section');?></th>
+                <th><?php echo get_phrase('Pay Date');?></th>
+                <th><?php echo get_phrase('Receipt No');?></th>
+                <th><?php echo get_phrase('Month From');?></th>
+                <th><?php echo get_phrase('Month To');?></th>
+                <th><?php echo get_phrase('Fee Name');?></th>
+                <th><?php echo get_phrase('Amount');?></th>
+                <th><?php echo get_phrase('Remark');?></th>
             </tr>
             </thead>
             <tbody>

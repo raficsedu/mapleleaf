@@ -196,6 +196,15 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label for="field-2" class="col-sm-3 control-label"><?php echo get_phrase('Yearly Fee');?></label>
+
+                    <div class="col-sm-5">
+                        <input type="checkbox" name="yearly_fee[]" value="admission" checked> Admission Fee<br>
+                        <input type="checkbox" name="yearly_fee[]" value="evaluation" checked> Evaluation Fee
+                    </div>
+                </div>
+
                     <div class="form-group">
                         <label for="field-2" class="col-sm-3 control-label"><?php echo get_phrase('Parent/Student Status');?></label>
 

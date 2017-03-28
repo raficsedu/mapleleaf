@@ -29,7 +29,7 @@
 </style>
 <hr />
 <div class="row">
-    <form id="filter_form" action="<?php echo base_url();?>index.php?admin/report/daily_collection" method="post">
+    <form id="filter_form" action="<?php echo base_url();?>index.php?admin/report/paid_students" method="post">
         <div class="row">
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Branch');?></label>
             <div class="col-sm-2">
@@ -83,9 +83,22 @@
                 </select>
             </div>
 
-            <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Date');?></label>
+            <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Month');?></label>
             <div class="col-sm-2">
-                <input type="text" id="date" class="form-control datepicker" name="date" value="<?php if(isset($_POST['date'])){echo $_POST['date'];}else{echo date('d/m/Y');}?>" placeholder="Date" data-validate="required" data-message-required="<?php echo get_phrase('value_required');?>" data-start-view="2">
+                <select name="month" id="month" class="form-control">
+                    <option value="01" <?php if($_POST['month'] == "01")echo "selected";?>>January</option>
+                    <option value="02" <?php if($_POST['month'] == "02")echo "selected";?>>February</option>
+                    <option value="03" <?php if($_POST['month'] == "03")echo "selected";?>>March</option>
+                    <option value="04" <?php if($_POST['month'] == "04")echo "selected";?>>April</option>
+                    <option value="05" <?php if($_POST['month'] == "05")echo "selected";?>>May</option>
+                    <option value="06" <?php if($_POST['month'] == "06")echo "selected";?>>June</option>
+                    <option value="07" <?php if($_POST['month'] == "07")echo "selected";?>>July</option>
+                    <option value="08" <?php if($_POST['month'] == "08")echo "selected";?>>August</option>
+                    <option value="09" <?php if($_POST['month'] == "09")echo "selected";?>>September</option>
+                    <option value="10" <?php if($_POST['month'] == "10")echo "selected";?>>October</option>
+                    <option value="11" <?php if($_POST['month'] == "11")echo "selected";?>>November</option>
+                    <option value="12" <?php if($_POST['month'] == "12")echo "selected";?>>December</option>
+                </select>
             </div>
 
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('class');?></label>
@@ -141,9 +154,42 @@
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Session');?></label>
             <div class="col-sm-2">
                 <select id="session" name="session" class="form-control">
-                    <option value="">Select Session</option>
                     <option value="01" <?php if($_POST['session']=='01')echo 'selected';?>><?php echo get_phrase('JAN');?></option>
                     <option value="07" <?php if($_POST['session']=='07')echo 'selected';?>><?php echo get_phrase('JULY');?></option>
+                </select>
+            </div>
+
+            <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Year');?></label>
+            <div class="col-sm-2">
+                <select id="year" name="year" class="form-control">
+                    <?php
+                    $current_year = date('Y');
+                    if(isset($_POST['session']) && $_POST['session'] == "01"){
+                        for($i = $current_year-3;$i <= $current_year;$i++){
+                            if($i == $_POST['year']){
+                                $s = "selected";
+                            }else{
+                                $s = "";
+                            }
+                            echo '<option value="'.$i.'" '.$s.'>'.$i.'</option>';
+                        }
+                    }else if(isset($_POST['session']) && $_POST['session'] == "07"){
+                        for($i = $current_year-3;$i <= $current_year;$i++){
+                            $j = $i+1;
+                            $y = $i.'-'.$j;
+                            if($y == $_POST['year']){
+                                $s = "selected";
+                            }else{
+                                $s = "";
+                            }
+                            echo '<option value="'.$y.'" '.$s.'>'.$y.'</option>';
+                        }
+                    }else{
+                        for($i = $current_year-3;$i <= $current_year;$i++){
+                            echo '<option value="'.$i.'">'.$i.'</option>';
+                        }
+                    }
+                    ?>
                 </select>
             </div>
 
@@ -180,7 +226,6 @@
                 <th><?php echo get_phrase('ADM');?></th>
                 <th><?php echo get_phrase('C.LAB');?></th>
                 <th><?php echo get_phrase('P.LAB');?></th>
-                <th><?php echo get_phrase('TC');?></th>
                 <th><?php echo get_phrase('VAT');?></th>
                 <th><?php echo get_phrase('TOTAL');?></th>
             </tr>
@@ -191,88 +236,88 @@
                 $total_collection = 0;
                 $total_payment = ($total_paid>0) ?  $total_paid : 0;
                 $total_refund = 0;
-                foreach($payments as $payment):
-                    if($payment['payment_type']==1){
-                        $sl++;
-                        echo '<tr>';
-                        echo '<td>'.$this->crud_model->get_type_name_by_id('branch',$payment['branch_id'],'branch_name').'</td>';
-                        echo '<td>'.$payment['roll'].'</td>';
-                        echo '<td>'.$payment['name'].'</td>';
-                        echo '<td>'.$this->crud_model->get_type_name_by_id('class',$payment['class_id']).'</td>';
-                        echo '<td>'.$this->crud_model->get_type_name_by_id('section',$payment['section_id']).'</td>';
-                        //Monthly Fee Print Out
-                        $monthly_fee = $payment['monthly_fee'];
-                        if($payment['monthly_fee_given'] < $payment['monthly_fee']){
-                            $monthly_fee = $payment['monthly_fee_given'];
-                        }
+                foreach($payments as $payment){
+                    $sl++;
+                    echo '<tr>';
+                    echo '<td>'.$this->crud_model->get_type_name_by_id('branch',$payment['branch_id'],'branch_name').'</td>';
+                    echo '<td>'.$payment['roll'].'</td>';
+                    echo '<td>'.$payment['name'].'</td>';
+                    echo '<td>'.$this->crud_model->get_type_name_by_id('class',$payment['class_id']).'</td>';
+                    echo '<td>'.$this->crud_model->get_type_name_by_id('section',$payment['section_id']).'</td>';
+                    //Monthly Fee Print Out
+                    $monthly_fee = $payment['monthly_fee'];
 
-                        for($i=1;$i<=12;$i++){
-                            $month[$i] = '';
-                        }
-                        $from = intval($payment['month_from']);
-                        $to = intval($payment['month_to']);
-                        for($i=$from;$i<=$to;$i++){
-                            $j = $i%12;
-                            if($j==0)
-                                $j = 12;
-                            $month[$j] = $monthly_fee;
-                        }
-                        echo '<td>'.$month[1].'</td>';
-                        echo '<td>'.$month[2].'</td>';
-                        echo '<td>'.$month[3].'</td>';
-                        echo '<td>'.$month[4].'</td>';
-                        echo '<td>'.$month[5].'</td>';
-                        echo '<td>'.$month[6].'</td>';
-                        echo '<td>'.$month[7].'</td>';
-                        echo '<td>'.$month[8].'</td>';
-                        echo '<td>'.$month[9].'</td>';
-                        echo '<td>'.$month[10].'</td>';
-                        echo '<td>'.$month[11].'</td>';
-                        echo '<td>'.$month[12].'</td>';
-
-                        //Printing payment items
-                        $sql = "SELECT * FROM payment_items WHERE payment_id='$payment[payment_id]'";
-                        $query = $this->db->query($sql);
-                        $payment_item = $query->result_array();
-
-                        $admission_fee = 0;
-                        $evaluation_fee = 0;
-                        $c_lab = 0;
-                        $p_lab = 0;
-                        $tc = 0;
-                        foreach($payment_item as $item){
-                            if($item['form_item_name']=='add_fee_nameadmission_fee'){
-                                $admission_fee = $item['item_amount'];
-                            }
-                            else if($item['form_item_name']=='add_fee_nameevaluation_fee'){
-                                $evaluation_fee = $item['item_amount'];
-                            }
-                            else if($item['form_item_name']=='add_fee_namec_lab_fee'){
-                                $c_lab = $item['item_amount'];
-                            }
-                            else if($item['form_item_name']=='add_fee_namep_lab_fee'){
-                                $p_lab = $item['item_amount'];
-                            }
-                            else if($item['form_item_name']=='add_fee_nametc'){
-                                $tc = $item['item_amount'];
-                            }
-                        }
-                        echo '<td>'.$evaluation_fee.'</td>';
-                        echo '<td>'.$admission_fee.'</td>';
-                        echo '<td>'.$c_lab.'</td>';
-                        echo '<td>'.$p_lab.'</td>';
-                        echo '<td>'.$tc.'</td>';
-                        //Printing out VAT and TOTAL
-                        echo '<td>'.$payment['vat'].'</td>';
-                        echo '<td>'.$payment['total_receivable'].'</td>';
-                        echo '</tr>';
-
-                        //Calculations
-                        $total_collection+= $payment['total_receivable'];
-                    }else if($payment['payment_type']==2){
-                        $total_refund = $total_refund + $payment['total_amount'];
+                    for($i=1;$i<=12;$i++){
+                        $month[$i] = '';
                     }
-                endforeach;
+                    if($_POST['session'] == "01"){
+                        $from = 1;
+                        $to = intval($_POST['month']);
+                    }else{
+                        $from = 7;
+                        $to = intval($_POST['month']);
+                        if($to <= 6){
+                            $to = $to + 12 ;
+                        }
+                    }
+                    for($i=$from;$i<=$to;$i++){
+                        $j = $i%12;
+                        if($j==0)
+                            $j = 12;
+                        $month[$j] = $monthly_fee;
+                    }
+                    echo '<td>'.$month[1].'</td>';
+                    echo '<td>'.$month[2].'</td>';
+                    echo '<td>'.$month[3].'</td>';
+                    echo '<td>'.$month[4].'</td>';
+                    echo '<td>'.$month[5].'</td>';
+                    echo '<td>'.$month[6].'</td>';
+                    echo '<td>'.$month[7].'</td>';
+                    echo '<td>'.$month[8].'</td>';
+                    echo '<td>'.$month[9].'</td>';
+                    echo '<td>'.$month[10].'</td>';
+                    echo '<td>'.$month[11].'</td>';
+                    echo '<td>'.$month[12].'</td>';
+
+                    //Printing payment items
+                    $sql = "SELECT payment_items.* FROM payment_items INNER JOIN payment ON payment.payment_id=payment_items.payment_id WHERE payment.student_id='$payment[student_id]' AND payment.payment_year='$_POST[year]' AND CAST(payment.month_from AS UNSIGNED)<= '$to'";
+                    $query = $this->db->query($sql);
+                    $payment_item = $query->result_array();
+
+                    $admission_fee = '';
+                    $evaluation_fee = '';
+                    $c_lab = '';
+                    $p_lab = '';
+                    foreach($payment_item as $item){
+                        if($item['form_item_name']=='add_fee_nameadmission_fee'){
+                            $admission_fee = $item['item_amount'];
+                            continue;
+                        }
+                        else if($item['form_item_name']=='add_fee_nameevaluation_fee'){
+                            $evaluation_fee = $item['item_amount'];
+                            continue;
+                        }
+                        else if($item['form_item_name']=='add_fee_namec_lab_fee'){
+                            $c_lab = $item['item_amount'];
+                            continue;
+                        }
+                        else if($item['form_item_name']=='add_fee_namep_lab_fee'){
+                            $p_lab = $item['item_amount'];
+                            continue;
+                        }
+                    }
+                    echo '<td>'.$evaluation_fee.'</td>';
+                    echo '<td>'.$admission_fee.'</td>';
+                    echo '<td>'.$c_lab.'</td>';
+                    echo '<td>'.$p_lab.'</td>';
+                    //Printing out VAT and TOTAL
+                    echo '<td>'.$payment['vat'].'</td>';
+                    echo '<td>'.$payment['total_receivable'].'</td>';
+                    echo '</tr>';
+
+                    //Calculations
+                    $total_collection+= $payment['total_receivable'];
+                }
 
                 //Printing bottom Final row
                 echo '
@@ -298,96 +343,8 @@
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue">Total Collection</td>
+                        <td style="font-weight:bold;color:blue">Total Amount</td>
                         <td style="font-weight:bold;color:blue">'.$total_collection.'</td>
-                    </tr>
-                    ';
-
-                echo '
-                    <tr>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue">Total Payment</td>
-                        <td style="font-weight:bold;color:blue">'.$total_payment.'</td>
-                    </tr>
-                    ';
-
-                echo '
-                    <tr>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue">Total Refund</td>
-                        <td style="font-weight:bold;color:blue">'.$total_refund.'</td>
-                    </tr>
-                    ';
-
-                echo '
-                    <tr>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue"></td>
-                        <td style="font-weight:bold;color:blue">Total Balance</td>
-                        <td style="font-weight:bold;color:blue">'.($total_collection-$total_payment-$total_refund).'</td>
                     </tr>
                     ';
                 ?>
@@ -397,7 +354,7 @@
 </div>
 <div id="table_header" style="display: none;">
     <h1 style="width: 100%;float: left;text-align: center"><?php echo $system_name;?></h1>
-    <h3 style="width: 100%;float: left;text-align: center">Report Name : Daily Collection</h3>
+    <h3 style="width: 100%;float: left;text-align: center">Report Name : Paid Students</h3>
     <hr>
     <div style="width: 100%;float: left;">
         <div style="width: 20%;float: left;">
@@ -413,19 +370,13 @@
             <h4>Section : <?php if($_POST['section_id'])echo $this->crud_model->get_type_name_by_id('section',$_POST['section_id']);?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Date : <?php if($_POST['date'])echo $_POST['date'];?></h4>
+            <h4>Month : <?php if($_POST['month'])echo $_POST['month'];?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Gender : <?php if($_POST['gender'])echo $_POST['gender'];?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Student Status : <?php if($_POST['student_status']>-1){
-                    if($_POST['student_status']=='0')echo 'Non Teacher';
-                    else if($_POST['student_status']=='1')echo 'Teacher';
-                    else if($_POST['student_status']=='2')echo 'Scholarship';
-                    else if($_POST['student_status']=='3')echo 'Teacher + Scholarship';
-                    else if($_POST['student_status']=='4')echo 'Special';
-                }?></h4>
+            <h4>Year : <?php if($_POST['year'])echo $_POST['year'];?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Session : <?php if($_POST['session']){
@@ -451,9 +402,60 @@
         });
     }
 
+    function set_month(){
+        var session = $('#session').val();
+        if(session == "01"){
+            var html = '<option value="01">January</option>' +
+                '<option value="02">February</option>' +
+                '<option value="03">March</option>' +
+                '<option value="04">April</option>' +
+                '<option value="05">May</option>' +
+                '<option value="06">June</option>' +
+                '<option value="07">July</option>' +
+                '<option value="08">August</option>' +
+                '<option value="09">September</option>' +
+                '<option value="10">October</option>' +
+                '<option value="11">November</option>' +
+                '<option value="12">December</option>';
+        }else if(session == "07"){
+            var html = '<option value="07">July</option>' +
+                '<option value="08">August</option>' +
+                '<option value="09">September</option>' +
+                '<option value="10">October</option>' +
+                '<option value="11">November</option>' +
+                '<option value="12">December</option>' +
+                '<option value="01">January</option>' +
+                '<option value="02">February</option>' +
+                '<option value="03">March</option>' +
+                '<option value="04">April</option>' +
+                '<option value="05">May</option>' +
+                '<option value="06">June</option>';
+        }
+        $('#month').html(html);
+    }
+
+    function set_year(){
+        var session = $('#session').val();
+        var current_year = new Date().getFullYear();
+        var html = '';
+        if(session == "01"){
+            for(var i = current_year-3;i<=current_year;i++){
+                html += '<option value="'+i+'">'+i+'</option>';
+            }
+        }else if(session == "07"){
+            for(var i = current_year-3;i<=current_year;i++){
+                var j = i+1;
+                html += '<option value="'+i+'-'+j+'">'+i+'-'+j+'</option>';
+            }
+        }
+        $('#year').html(html);
+    }
+
     jQuery('#session').change(function(){
         var class_id = jQuery('#class_id').val();
         get_class_sections(class_id);
+        set_month();
+        set_year();
     });
 
     jQuery(document).ready(function($)
@@ -470,11 +472,11 @@
 
                     {
                         "sExtends": "xls",
-                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
                     },
                     {
                         "sExtends": "pdf",
-                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
                     },
                     {
                         "sExtends": "print",

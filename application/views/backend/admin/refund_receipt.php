@@ -166,14 +166,14 @@
                 <table class="table table-bordered datatable" id="table_export">
                     <thead>
                     <tr>
-                        <th width="70"><div><?php echo get_phrase('SL');?></div></th>
-                        <th><div><?php echo get_phrase('Receipt No');?></div></th>
-                        <th><div><?php echo get_phrase('Receipt Date');?></div></th>
-                        <th><div><?php echo get_phrase('Student ID');?></div></th>
-                        <th><div><?php echo get_phrase('Student name');?></div></th>
-                        <th><div><?php echo get_phrase('class');?></div></th>
-                        <th><div><?php echo get_phrase('section');?></div></th>
-                        <th><div><?php echo get_phrase('Refund Amount');?></div></th>
+                        <th width="70"><?php echo get_phrase('SL');?></th>
+                        <th><?php echo get_phrase('Receipt No');?></th>
+                        <th><?php echo get_phrase('Receipt Date');?></th>
+                        <th><?php echo get_phrase('Student ID');?></th>
+                        <th><?php echo get_phrase('Student name');?></th>
+                        <th><?php echo get_phrase('class');?></th>
+                        <th><?php echo get_phrase('section');?></th>
+                        <th><?php echo get_phrase('Refund Amount');?></th>
                     </tr>
                     </thead>
                     <tbody>

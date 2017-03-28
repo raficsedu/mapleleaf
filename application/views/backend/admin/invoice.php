@@ -577,7 +577,7 @@
     $(document.body).on('change', '#adjustment_to', function(){
         var aa = $('#invoice_adjustment_amount').val();
         aa = parseFloat(aa);
-        if(aa!=""){
+        if(aa > -1){
             var at = $('#adjustment_to').val();
             if(at=="refund"){
                 $("#payment_table").empty();
@@ -740,6 +740,8 @@
                 //Final amount calculation
                 final_calculation();
             }*/
+        }else{
+            alert('You have given a negative number');
         }
     });
 
@@ -919,7 +921,7 @@
 
                     //Get student payment info
                     $.ajax({
-                        url: '<?php echo base_url();?>index.php?admin/get_students_payment_stauts_by_id/' + s_id,
+                        url: '<?php echo base_url();?>index.php?admin/get_students_payment_status_by_id/' + s_id,
                         success: function(response)
                         {
                             var info = response.split("~");
