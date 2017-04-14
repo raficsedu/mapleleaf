@@ -234,8 +234,8 @@
                 <?php
                 $sl = 0;
                 $total_collection = 0;
-                $total_payment = ($total_paid>0) ?  $total_paid : 0;
-                $total_refund = 0;
+                $row_total = 0;
+                $vat_total = 0;
                 foreach($payments as $payment){
                     $sl++;
                     echo '<tr>';
@@ -244,27 +244,32 @@
                     echo '<td>'.$payment['name'].'</td>';
                     echo '<td>'.$this->crud_model->get_type_name_by_id('class',$payment['class_id']).'</td>';
                     echo '<td>'.$this->crud_model->get_type_name_by_id('section',$payment['section_id']).'</td>';
-                    //Monthly Fee Print Out
-                    $monthly_fee = $payment['monthly_fee'];
 
                     for($i=1;$i<=12;$i++){
                         $month[$i] = '';
                     }
                     if($_POST['session'] == "01"){
-                        $from = 1;
-                        $to = intval($_POST['month']);
+                        $to_month = intval($_POST['month']);
                     }else{
-                        $from = 7;
-                        $to = intval($_POST['month']);
-                        if($to <= 6){
-                            $to = $to + 12 ;
-                        }
+                        $to_month = (intval($_POST['month']) <= 6) ? intval($_POST['month']) + 12 : intval($_POST['month']);
                     }
-                    for($i=$from;$i<=$to;$i++){
-                        $j = $i%12;
-                        if($j==0)
-                            $j = 12;
-                        $month[$j] = $monthly_fee;
+                    //Student Payment
+                    $sql = "SELECT * FROM payment WHERE student_id='$payment[student_id]' AND payment_type='1' AND deleted='0' AND payment_year='$_POST[year]' AND CAST(month_from AS UNSIGNED)<= '$to_month'";
+                    $query = $this->db->query($sql);
+                    $student_payments = $query->result_array();
+                    foreach($student_payments as $sp){
+                        $from = intval($sp['month_from']);
+                        $to = (intval($sp['month_to']) > $to_month) ? $to_month : intval($sp['month_to']);
+
+                        for($i=$from;$i<=$to;$i++){
+                            $j = $i%12;
+                            if($j==0)
+                                $j = 12;
+                            $month[$j] = ($sp['monthly_fee_given'] < $sp['monthly_fee']) ? $sp['monthly_fee_given'] : $sp['monthly_fee'];
+                            $row_total += $month[$j];
+                            $vat_total += $sp['vat'];
+                            $row_total += $vat_total;
+                        }
                     }
                     echo '<td>'.$month[1].'</td>';
                     echo '<td>'.$month[2].'</td>';
@@ -279,30 +284,35 @@
                     echo '<td>'.$month[11].'</td>';
                     echo '<td>'.$month[12].'</td>';
 
+                    $admission_fee = 0;
+                    $evaluation_fee = 0;
+                    $c_lab = 0;
+                    $p_lab = 0;
+
                     //Printing payment items
-                    $sql = "SELECT payment_items.* FROM payment_items INNER JOIN payment ON payment.payment_id=payment_items.payment_id WHERE payment.student_id='$payment[student_id]' AND payment.payment_year='$_POST[year]' AND CAST(payment.month_from AS UNSIGNED)<= '$to'";
+                    $sql = "SELECT payment_items.* FROM payment_items INNER JOIN payment ON payment.payment_id=payment_items.payment_id WHERE payment.student_id='$payment[student_id]' AND payment.payment_type='1' AND payment.deleted='0' AND payment.payment_year='$_POST[year]' AND CAST(payment.month_from AS UNSIGNED)<= '$to_month'";
                     $query = $this->db->query($sql);
                     $payment_item = $query->result_array();
 
-                    $admission_fee = '';
-                    $evaluation_fee = '';
-                    $c_lab = '';
-                    $p_lab = '';
                     foreach($payment_item as $item){
                         if($item['form_item_name']=='add_fee_nameadmission_fee'){
                             $admission_fee = $item['item_amount'];
+                            $row_total += $admission_fee;
                             continue;
                         }
                         else if($item['form_item_name']=='add_fee_nameevaluation_fee'){
                             $evaluation_fee = $item['item_amount'];
+                            $row_total += $evaluation_fee;
                             continue;
                         }
                         else if($item['form_item_name']=='add_fee_namec_lab_fee'){
                             $c_lab = $item['item_amount'];
+                            $row_total += $c_lab;
                             continue;
                         }
                         else if($item['form_item_name']=='add_fee_namep_lab_fee'){
                             $p_lab = $item['item_amount'];
+                            $row_total += $p_lab;
                             continue;
                         }
                     }
@@ -311,12 +321,12 @@
                     echo '<td>'.$c_lab.'</td>';
                     echo '<td>'.$p_lab.'</td>';
                     //Printing out VAT and TOTAL
-                    echo '<td>'.$payment['vat'].'</td>';
-                    echo '<td>'.$payment['total_receivable'].'</td>';
+                    echo '<td>'.$vat_total.'</td>';
+                    echo '<td>'.$row_total.'</td>';
                     echo '</tr>';
 
                     //Calculations
-                    $total_collection+= $payment['total_receivable'];
+                    $total_collection+= $row_total;
                 }
 
                 //Printing bottom Final row
@@ -358,10 +368,10 @@
     <hr>
     <div style="width: 100%;float: left;">
         <div style="width: 20%;float: left;">
-            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'name');?></h4>
+            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'branch_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Building : <?php if($_POST['building_info'])echo $this->crud_model->get_building_name('building',$_POST['building_info'],'name');?></h4>
+            <h4>Building : <?php if($_POST['building_info'])echo $this->crud_model->get_building_name('building',$_POST['building_info'],'building_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Class : <?php if($_POST['class_id'])echo $this->crud_model->get_type_name_by_id('class',$_POST['class_id']);?></h4>

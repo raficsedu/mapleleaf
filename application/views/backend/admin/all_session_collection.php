@@ -212,7 +212,7 @@
     <hr>
     <div style="width: 100%;float: left;">
         <div style="width: 20%;float: left;">
-            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'name');?></h4>
+            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'branch_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Date From : <?php if($_POST['date_from'])echo $_POST['date_from'];?></h4>

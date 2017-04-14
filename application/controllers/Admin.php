@@ -2652,8 +2652,6 @@ class Admin extends CI_Controller
         }
         $page_data['page_name']  = 'invoice';
         $page_data['page_title'] = get_phrase('manage_invoice/payment');
-        $this->db->order_by('creation_timestamp', 'desc');
-        $page_data['invoices'] = $this->db->get('invoice')->result_array();
         $this->load->view('backend/index', $page_data);
     }
 
@@ -4035,7 +4033,7 @@ class Admin extends CI_Controller
                 }
             }
 
-            $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll,MAX(school_fee.month) AS month FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND CAST(school_fee.month AS UNSIGNED)<'$month' AND school_fee.year='$year'";
+            $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll,MAX(school_fee.month) AS paid_upto FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND CAST(school_fee.month AS UNSIGNED)<'$month' AND school_fee.year='$year'";
 
 
             if($branch!=''){
@@ -4474,6 +4472,141 @@ class Admin extends CI_Controller
         echo json_encode($output);
     }
 
+    function server_processing_all_payment(){
+        /* Array of database columns which should be read and sent back to DataTables. Use a space where
+         * you want to insert a non-database field (for example a counter or static image)
+         */
+        $aColumns = array('payment_id', 'paid_to','address','purpose','total_amount','branch_id','collector_id','timestamp');
+
+        // DB table to use
+        $sTable = 'payment';
+        //
+
+        $iDisplayStart = $this->input->get_post('iDisplayStart', true);
+        $iDisplayLength = $this->input->get_post('iDisplayLength', true);
+        $iSortCol_0 = $this->input->get_post('iSortCol_0', true);
+        $iSortingCols = $this->input->get_post('iSortingCols', true);
+        $sSearch = $this->input->get_post('sSearch', true);
+        $sEcho = $this->input->get_post('sEcho', true);
+
+        // Paging
+        if(isset($iDisplayStart) && $iDisplayLength != '-1')
+        {
+            $this->db->limit($this->db->escape_str($iDisplayLength), $this->db->escape_str($iDisplayStart));
+        }
+
+        // Ordering
+        if(isset($iSortCol_0))
+        {
+            for($i=0; $i<intval($iSortingCols); $i++)
+            {
+                $iSortCol = $this->input->get_post('iSortCol_'.$i, true);
+                $bSortable = $this->input->get_post('bSortable_'.intval($iSortCol), true);
+                $sSortDir = $this->input->get_post('sSortDir_'.$i, true);
+
+                if($bSortable == 'true')
+                {
+                    $this->db->order_by($aColumns[intval($this->db->escape_str($iSortCol))], $this->db->escape_str($sSortDir));
+                }
+            }
+        }
+
+        /*
+         * Filtering
+         * NOTE this does not match the built-in DataTables filtering which does it
+         * word by word on any field. It's possible to do here, but concerned about efficiency
+         * on very large tables, and MySQL's regex functionality is very limited
+         */
+        if(isset($sSearch) && !empty($sSearch))
+        {
+            for($i=0; $i<count($aColumns); $i++)
+            {
+                $bSearchable = $this->input->get_post('bSearchable_'.$i, true);
+
+                // Individual column filtering
+                if(isset($bSearchable) && $bSearchable == 'true')
+                {
+                    $this->db->or_like($aColumns[$i], $this->db->escape_like_str($sSearch));
+                }
+            }
+        }
+
+        // Select Data
+        $level = $_SESSION['level'];
+        if($level==1){
+            $this->db->select('SQL_CALC_FOUND_ROWS '.str_replace(' , ', ' ', implode(', ', $aColumns)), false);
+            $rResult = $this->db->get_where($sTable,array('deleted'=>0,'payment_type'=>3) );
+        }else{
+            $this->db->select('SQL_CALC_FOUND_ROWS '.str_replace(' , ', ' ', implode(', ', $aColumns)), false);
+            $rResult = $this->db->get_where($sTable,array('deleted'=>0,'collector_id'=>$_SESSION['admin_id'],'payment_type'=>3) );
+        }
+
+        // Data set length after filtering
+        $this->db->select('FOUND_ROWS() AS found_rows');
+        $iFilteredTotal = $this->db->get()->row()->found_rows;
+
+        // Total data set length
+        $iTotal = $this->db->count_all($sTable);
+
+        // Output
+        $output = array(
+            'sEcho' => intval($sEcho),
+            'iTotalRecords' => $iTotal,
+            'iTotalDisplayRecords' => $iFilteredTotal,
+            'aaData' => array()
+        );
+
+        $sl = $iDisplayStart + 1 ;
+
+        foreach($rResult->result_array() as $aRow)
+        {
+            $row = array();
+
+            //Arranging Data
+            $row[] = $aRow['payment_id'];
+            $row[] = $aRow['paid_to'];
+            $row[] = $aRow['address'];
+            $row[] = $aRow['purpose'];
+            $row[] = $aRow['total_amount'];
+            $row[] = $this->crud_model->get_type_name_by_id('branch',$aRow['branch_id'],'branch_name');
+            $row[] = $this->crud_model->get_type_name_by_id('admin',$aRow['collector_id']);
+            $t = explode('-',$aRow['timestamp']);
+            $date = $t[2].'-'.$t[1].'-'.$t[0];
+            $row[] = $date;
+
+            //Making Action Link
+            $action = '<div class="btn-group">
+                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">Action <span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-default pull-right" role="menu">';
+            $branch_id = $_SESSION['branch'];
+            $level = $_SESSION['level'];
+            if($level==1 || $aRow['timestamp']==date('Y-m-d')){
+                $action .= '<li>
+                    <a href="javascript:void(0)" onclick="showAjaxModal(\''.base_url().'index.php?modal/popup/modal_payment_edit/'.$aRow['payment_id'].'\')">
+                        <i class="entypo-pencil"></i>
+                        '.get_phrase('edit').'
+                    </a>
+                </li>
+                <li class="divider"></li>
+
+                <!-- DELETION LINK -->
+                <li>
+                        <a href="javascript:void(0)" onclick="confirm_modal(\''.base_url().'index.php?admin/payment/delete/'.$aRow['payment_id'].'\')">
+                        <i class="entypo-trash"></i>
+                        '.get_phrase('delete').'
+                    </a>
+                </li>';
+            }
+            $action .= '</ul></div>';
+            $row[] = $action;
+
+            $output['aaData'][] = $row;
+            $sl++;
+        }
+
+        echo json_encode($output);
+    }
+
     function server_processing_all_invoice(){
         /* Array of database columns which should be read and sent back to DataTables. Use a space where
          * you want to insert a non-database field (for example a counter or static image)
@@ -4550,9 +4683,11 @@ class Admin extends CI_Controller
 
         // Select Data
         $level = $_SESSION['level'];
+        $where = "payment_type=1 OR payment_type=2";
+        $this->db->where($where);
         if($level==1){
             $this->db->select('SQL_CALC_FOUND_ROWS '.str_replace(' , ', ' ', implode(', ', $aColumns)), false);
-            $rResult = $this->db->get_where($sTable,array('deleted'=>0) )->result_array();
+            $rResult = $this->db->get_where($sTable,array('deleted'=>0,'payment_type') )->result_array();
         }else{
             $this->db->select('SQL_CALC_FOUND_ROWS '.str_replace(' , ', ' ', implode(', ', $aColumns)), false);
             $rResult = $this->db->get_where($sTable,array('deleted'=>0,'collector_id'=>$_SESSION['admin_id']) )->result_array();

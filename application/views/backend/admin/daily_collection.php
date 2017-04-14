@@ -401,22 +401,22 @@
     <hr>
     <div style="width: 100%;float: left;">
         <div style="width: 20%;float: left;">
-            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'name');?></h4>
+            <h4>Branch : <?php if(isset($_POST['branch_info']))echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'branch_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Building : <?php if($_POST['building_info'])echo $this->crud_model->get_building_name('building',$_POST['building_info'],'name');?></h4>
+            <h4>Building : <?php if(isset($_POST['building_info']))echo $this->crud_model->get_building_name('building',$_POST['building_info'],'building_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Class : <?php if($_POST['class_id'])echo $this->crud_model->get_type_name_by_id('class',$_POST['class_id']);?></h4>
+            <h4>Class : <?php if(isset($_POST['class_id']))echo $this->crud_model->get_type_name_by_id('class',$_POST['class_id']);?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Section : <?php if($_POST['section_id'])echo $this->crud_model->get_type_name_by_id('section',$_POST['section_id']);?></h4>
+            <h4>Section : <?php if(isset($_POST['section_id']))echo $this->crud_model->get_type_name_by_id('section',$_POST['section_id']);?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Date : <?php if($_POST['date'])echo $_POST['date'];?></h4>
+            <h4>Date : <?php if(isset($_POST['date']))echo $_POST['date'];?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Gender : <?php if($_POST['gender'])echo $_POST['gender'];?></h4>
+            <h4>Gender : <?php if(isset($_POST['gender']))echo $_POST['gender'];?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Student Status : <?php if($_POST['student_status']>-1){
@@ -428,7 +428,7 @@
                 }?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Session : <?php if($_POST['session']){
+            <h4>Session : <?php if(isset($_POST['session'])){
                     if($_POST['session']=='01')echo 'JAN';
                     else if($_POST['session']=='07')echo 'JUL';
                 }?></h4>

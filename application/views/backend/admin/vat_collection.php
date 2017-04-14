@@ -229,10 +229,10 @@
     <hr>
     <div style="width: 100%;float: left;">
         <div style="width: 20%;float: left;">
-            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'name');?></h4>
+            <h4>Branch : <?php if($_POST['branch_info'])echo $this->crud_model->get_type_name_by_id('branch',$_POST['branch_info'],'branch_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
-            <h4>Building : <?php if($_POST['building_info'])echo $this->crud_model->get_building_name('building',$_POST['building_info'],'name');?></h4>
+            <h4>Building : <?php if($_POST['building_info'])echo $this->crud_model->get_building_name('building',$_POST['building_info'],'building_name');?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Class : <?php if($_POST['class_id'])echo $this->crud_model->get_type_name_by_id('class',$_POST['class_id']);?></h4>
@@ -248,15 +248,6 @@
         </div>
         <div style="width: 20%;float: left;">
             <h4>Gender : <?php if($_POST['gender'])echo $_POST['gender'];?></h4>
-        </div>
-        <div style="width: 20%;float: left;">
-            <h4>Student Status : <?php if($_POST['student_status']>-1){
-                    if($_POST['student_status']=='0')echo 'Non Teacher';
-                    else if($_POST['student_status']=='1')echo 'Teacher';
-                    else if($_POST['student_status']=='2')echo 'Scholarship';
-                    else if($_POST['student_status']=='3')echo 'Teacher + Scholarship';
-                    else if($_POST['student_status']=='4')echo 'Special';
-                }?></h4>
         </div>
         <div style="width: 20%;float: left;">
             <h4>Session : <?php if($_POST['session']){
