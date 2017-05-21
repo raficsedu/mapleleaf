@@ -39,7 +39,7 @@
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Branch');?></label>
             <div class="col-sm-2">
                 <select name="branch_info" class="form-control" data-validate="required" id="branch_info">
-                    <option value=""><?php echo get_phrase('select branch');?></option>
+                    <option value=""><?php echo get_phrase('all branch');?></option>
                     <?php
                     $branch_id = $_SESSION['branch'];
                     $level = $_SESSION['level'];
@@ -75,7 +75,7 @@
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Building');?></label>
             <div class="col-sm-2">
                 <select name="building_info" class="form-control" id="building_info">
-                    <option value=""><?php echo get_phrase('select building');?></option>
+                    <option value=""><?php echo get_phrase('all building');?></option>
                     <?php
                     $buildings = $this->db->get('building')->result_array();
                     foreach($buildings as $building):
@@ -188,6 +188,7 @@
                 <th><?php echo get_phrase('RE Adm');?></th>
                 <th><?php echo get_phrase('ADM Form');?></th>
                 <th><?php echo get_phrase('TC');?></th>
+                <th><?php echo get_phrase('Fine');?></th>
                 <th><?php echo get_phrase('Total without VAT');?></th>
                 <th><?php echo get_phrase('VAT');?></th>
                 <th><?php echo get_phrase('Total with VAT');?></th>
@@ -203,6 +204,7 @@
                 $total_admission = 0;
                 $total_clab = 0;
                 $total_plab = 0;
+                $total_fine = 0;
                 $total_re_admission = 0;
                 $total_admission_form = 0;
                 $total_tc = 0;
@@ -251,6 +253,7 @@
                     $row_admission = 0;
                     $row_clab = 0;
                     $row_plab = 0;
+                    $row_fine = 0;
                     $row_re_admission = 0;
                     $row_admission_form = 0;
                     $row_tc = 0;
@@ -267,26 +270,30 @@
                             $sql = "SELECT * FROM payment_items WHERE payment_id='$s_payment[payment_id]'";
                             $query = $this->db->query($sql);
                             $payment_item = $query->result_array();
+                            $admission_fee = 0;
+                            $evaluation_fee = 0;
+                            $c_lab = 0;
+                            $p_lab = 0;
+                            $tc = 0;
+                            $fine = 0;
                             foreach($payment_item as $item){
-                                $admission_fee = 0;
-                                $evaluation_fee = 0;
-                                $c_lab = 0;
-                                $p_lab = 0;
-                                $tc = 0;
                                 if($item['form_item_name']=='add_fee_nameadmission_fee'){
                                     $admission_fee = $item['item_amount'];
                                 }
                                 else if($item['form_item_name']=='add_fee_nameevaluation_fee'){
                                     $evaluation_fee = $item['item_amount'];
                                 }
-                                else if(strpos($item['item_name'], 'Chemistry Lab') !== false){
+                                else if($item['form_item_name']=='add_fee_namec_lab_fee'){
                                     $c_lab = $item['item_amount'];
                                 }
-                                else if(strpos($item['item_name'], 'Physics Lab') !== false){
+                                else if($item['form_item_name']=='add_fee_namep_lab_fee'){
                                     $p_lab = $item['item_amount'];
                                 }
-                                else if(strpos($item['item_name'], 'TC') !== false){
+                                else if($item['form_item_name']=='add_fee_nametc'){
                                     $tc = $item['item_amount'];
+                                }
+                                else if($item['form_item_name']=='fine'){
+                                    $fine = $item['item_amount'];
                                 }
                             }
 
@@ -299,6 +306,7 @@
                             $row_re_admission += 0;
                             $row_admission_form += 0;
                             $row_tc += $tc;
+                            $row_fine += $fine;
                             $row_without_vat += $s_payment['total_receivable'] - $s_payment['vat'];
                             $row_vat += $s_payment['vat'];
                             $row_collection += $s_payment['total_receivable'];
@@ -322,6 +330,7 @@
                         <td>'.$row_re_admission.'</td>
                         <td>'.$row_admission_form.'</td>
                         <td>'.$row_tc.'</td>
+                        <td>'.$row_fine.'</td>
                         <td>'.$row_without_vat.'</td>
                         <td>'.$row_vat.'</td>
                         <td>'.$row_collection.'</td>
@@ -340,6 +349,7 @@
                     $total_re_admission += $row_re_admission;
                     $total_admission_form += $row_admission_form;
                     $total_tc += $row_tc;
+                    $total_fine += $row_fine;
                     $total_without_vat += $row_without_vat;
                     $total_vat += $row_vat;
                     $total_collection += $row_collection;
@@ -360,6 +370,7 @@
                         <td style="font-weight:bold;color:blue">'.$total_re_admission.'</td>
                         <td style="font-weight:bold;color:blue">'.$total_admission_form.'</td>
                         <td style="font-weight:bold;color:blue">'.$total_tc.'</td>
+                        <td style="font-weight:bold;color:blue">'.$total_fine.'</td>
                         <td style="font-weight:bold;color:blue">'.$total_without_vat.'</td>
                         <td style="font-weight:bold;color:blue">'.$total_vat.'</td>
                         <td style="font-weight:bold;color:blue">'.$total_collection.'</td>
@@ -442,11 +453,11 @@
 
                     {
                         "sExtends": "xls",
-                        "mColumns": [0, 1,2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14]
+                        "mColumns": [0, 1,2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15]
                     },
                     {
                         "sExtends": "pdf",
-                        "mColumns": [0, 1,2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14]
+                        "mColumns": [0, 1,2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15]
                     },
                     {
                         "sExtends": "print",

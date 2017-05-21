@@ -133,7 +133,7 @@
             <tbody>
                 <?php
                 $total_collection = 0;
-                $total_payment = ($total_paid>0) ? $total_paid : 0;
+                $total_payment = ($total_paid > 0) ? $total_paid : 0;
                 $total_refund = 0;
 
                 $total_tuition_fee = 0;
@@ -143,8 +143,9 @@
                 foreach($payments as $payment):
                     //Calculations
                     if($payment['payment_type']==1){
-                        $total_tuition_fee += $payment['monthly_fee'] * (intval($payment['month_to']) - intval($payment['month_from']) + 1);
-                        $total_others_fee += $payment['total_amount'] - $total_tuition_fee;
+                        $row_tuition_fee = $payment['monthly_fee'] * (intval($payment['month_to']) - intval($payment['month_from']) + 1);
+                        $total_tuition_fee += $row_tuition_fee;
+                        $total_others_fee += $payment['total_amount'] - $row_tuition_fee;
                         $total_vat += $payment['vat'];
                         $net_collection += $payment['total_receivable'];
                     }else if($payment['payment_type']==2){

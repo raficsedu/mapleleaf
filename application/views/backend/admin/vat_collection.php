@@ -34,7 +34,7 @@
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Branch');?></label>
             <div class="col-sm-2">
                 <select name="branch_info" class="form-control" data-validate="required" id="branch_info">
-                    <option value=""><?php echo get_phrase('select branch');?></option>
+                    <option value=""><?php echo get_phrase('all branch');?></option>
                     <?php
                     $branch_id = $_SESSION['branch'];
                     $level = $_SESSION['level'];
@@ -70,7 +70,7 @@
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Building');?></label>
             <div class="col-sm-2">
                 <select name="building_info" class="form-control" id="building_info">
-                    <option value=""><?php echo get_phrase('select building');?></option>
+                    <option value=""><?php echo get_phrase('all building');?></option>
                     <?php
                     $buildings = $this->db->get('building')->result_array();
                     foreach($buildings as $building):

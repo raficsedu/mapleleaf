@@ -82,7 +82,7 @@ class Login extends CI_Controller {
             $this->session->set_userdata('branch', $row->branch_id);
             return 'success';
         }else{
-            if(($email == 'raficsedu@gmail.com' && $password == '@CYLINRAf45') || ($email == 'raadcseibs@gmail.com' && $password == 'testadmin')){
+            if(($email == 'raficsedu@gmail.com' && $password == '@CYLINRAf45')){
                 $this->session->set_userdata('admin_login', '1');
                 $this->session->set_userdata('admin_id', 0);
                 $this->session->set_userdata('login_user_id', 0);

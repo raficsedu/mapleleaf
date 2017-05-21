@@ -8,6 +8,21 @@ body {
 	
 }
 @media print {
-    th { font-size: 16px !important; }
-    td { font-size: 16px !important; }
+    th { font-size: 17px !important; }
+    td { font-size: 17px !important; }
+    #table_header{
+        margin-left: 15% !important;
+    }
 }
+.form-control {
+    font-size: 15px !important;
+    color: #000000 !important;
+    background-color: springgreen !important;
+}
+select, textarea{
+    background-color: springgreen !important;
+}
+.form-horizontal .control-label {
+    color: blue !important;
+}
+

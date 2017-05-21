@@ -1133,6 +1133,7 @@ class Admin extends CI_Controller
             $from_year++;
             $is_increased = 1;
         }
+
         while($from_month<=$to_month && $from_year<=$to_year){
             $m = $from_month%12;
             if($m==0){
@@ -3752,7 +3753,12 @@ class Admin extends CI_Controller
 
             $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE 1 AND payment.timestamp='$date' AND (payment.payment_type='1' OR payment.payment_type='2') AND payment.deleted='0'";
 
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -3815,8 +3821,12 @@ class Admin extends CI_Controller
 
             $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE (payment.timestamp BETWEEN '$date_from' AND '$date_to') AND payment.payment_type='1' AND payment.deleted='0'";
 
-
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -3874,8 +3884,12 @@ class Admin extends CI_Controller
 
             $sql = "SELECT DISTINCT payment.timestamp FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE (payment.timestamp BETWEEN '$date_from' AND '$date_to') AND payment.deleted='0'";
 
-
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -3896,8 +3910,12 @@ class Admin extends CI_Controller
 
             $sql.= " ORDER BY payment.timestamp ASC";
 
-            $query = $this->db->query($sql);
-            $payments = $query->result_array();
+            if($_POST){
+                $query = $this->db->query($sql);
+                $payments = $query->result_array();
+            }else{
+                $payments = array();
+            }
 
             $page_data['page_name']  = 'collection_summary';
             $page_data['page_title'] = get_phrase('Report-Collection Summary');
@@ -3935,8 +3953,12 @@ class Admin extends CI_Controller
 
             $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE (payment.timestamp BETWEEN '$date_from' AND '$date_to') AND (payment.payment_type='1' OR payment.payment_type='2') AND payment.deleted='0'";
 
-
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -3955,8 +3977,12 @@ class Admin extends CI_Controller
                 $sql.= " AND student.s_session='$session'";
             }
 
-            $query = $this->db->query($sql);
-            $payments = $query->result_array();
+            if($_POST){
+                $query = $this->db->query($sql);
+                $payments = $query->result_array();
+            }else{
+                $payments = array();
+            }
 
             $page_data['page_name']  = 'all_student_collection';
             $page_data['page_title'] = get_phrase('Report-All Student Collection');
@@ -3985,7 +4011,12 @@ class Admin extends CI_Controller
             $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND school_fee.month='$month' AND school_fee.year='$year'";
 
 
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -4033,10 +4064,15 @@ class Admin extends CI_Controller
                 }
             }
 
-            $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll,MAX(school_fee.month) AS paid_upto FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND CAST(school_fee.month AS UNSIGNED)<'$month' AND school_fee.year='$year'";
+            $sql = "SELECT payment.*,student.student_id,student.name,student.class_id,student.section_id,student.roll,MAX(school_fee.month) AS paid_upto FROM payment INNER JOIN student ON payment.student_id=student.student_id INNER JOIN school_fee ON payment.payment_id=school_fee.payment_id WHERE payment.payment_type='1' AND payment.deleted='0' AND school_fee.year='$year'";
 
 
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -4055,7 +4091,7 @@ class Admin extends CI_Controller
                 $sql.= " AND student.s_session='$session'";
             }
 
-            $sql.= " GROUP BY student.student_id";
+            $sql.= " GROUP BY student.student_id HAVING CAST(MAX(school_fee.month) AS UNSIGNED)<'$month'";
 
             $query = $this->db->query($sql);
             $payments = $query->result_array();
@@ -4077,8 +4113,12 @@ class Admin extends CI_Controller
 
             $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE (payment.timestamp BETWEEN '$date_from' AND '$date_to') AND payment.payment_type='1' AND payment.deleted='1'";
 
-
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -4118,7 +4158,12 @@ class Admin extends CI_Controller
             $sql = "SELECT * FROM payment INNER JOIN student ON payment.student_id=student.student_id WHERE (payment.timestamp BETWEEN '$date_from' AND '$date_to') AND payment.payment_type='2' AND payment.deleted='0'";
 
 
-            if($branch!=''){
+            if($_SESSION['level'] == 1){
+                if($branch!=''){
+                    $sql.= " AND payment.branch_id='$branch'";
+                }
+            }else{
+                $branch = $_SESSION['branch'];
                 $sql.= " AND payment.branch_id='$branch'";
             }
             if($building!=''){
@@ -4270,6 +4315,7 @@ class Admin extends CI_Controller
 
     function load_students($session='',$class='',$section='',$year=''){
         $sql = "SELECT * FROM student WHERE class_id='$class' AND section_id='$section' AND year='$year' AND s_session='$session' AND (active='1' OR active='2') AND deleted='0' ORDER BY name ASC";
+        print_r($sql);
         $query = $this->db->query($sql);
         $students = $query->result_array();
 
@@ -4683,14 +4729,16 @@ class Admin extends CI_Controller
 
         // Select Data
         $level = $_SESSION['level'];
-        $where = "payment_type=1 OR payment_type=2";
-        $this->db->where($where);
         if($level==1){
+            $where = "deleted=0 AND (payment_type=1 OR payment_type=2)";
+            $this->db->where($where);
             $this->db->select('SQL_CALC_FOUND_ROWS '.str_replace(' , ', ' ', implode(', ', $aColumns)), false);
-            $rResult = $this->db->get_where($sTable,array('deleted'=>0,'payment_type') )->result_array();
+            $rResult = $this->db->get_where($sTable,array() )->result_array();
         }else{
+            $where = "deleted=0 AND collector_id='$_SESSION[admin_id]' AND (payment_type=1 OR payment_type=2)";
+            $this->db->where($where);
             $this->db->select('SQL_CALC_FOUND_ROWS '.str_replace(' , ', ' ', implode(', ', $aColumns)), false);
-            $rResult = $this->db->get_where($sTable,array('deleted'=>0,'collector_id'=>$_SESSION['admin_id']) )->result_array();
+            $rResult = $this->db->get_where($sTable,array() )->result_array();
         }
 
         // Data set length after filtering

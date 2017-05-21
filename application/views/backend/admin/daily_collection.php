@@ -35,7 +35,7 @@
             <div class="col-sm-2">
                 <select name="branch_info" class="form-control" data-validate="required" id="branch_info"
                         data-message-required="<?php echo get_phrase('value_required');?>">
-                    <option value=""><?php echo get_phrase('select branch');?></option>
+                    <option value=""><?php echo get_phrase('all branch');?></option>
                     <?php
                     $branch_id = $_SESSION['branch'];
                     $level = $_SESSION['level'];
@@ -62,7 +62,7 @@
             <label for="field-2" class="col-sm-1 control-label"><?php echo get_phrase('Building');?></label>
             <div class="col-sm-2">
                 <select name="building_info" class="form-control" id="building_info">
-                    <option value=""><?php echo get_phrase('select building');?></option>
+                    <option value=""><?php echo get_phrase('all building');?></option>
                     <?php
                     if($level==1){
                         $buildings = $this->db->get('building')->result_array();
@@ -181,6 +181,7 @@
                 <th><?php echo get_phrase('C.LAB');?></th>
                 <th><?php echo get_phrase('P.LAB');?></th>
                 <th><?php echo get_phrase('TC');?></th>
+                <th><?php echo get_phrase('Fine');?></th>
                 <th><?php echo get_phrase('VAT');?></th>
                 <th><?php echo get_phrase('TOTAL');?></th>
             </tr>
@@ -240,6 +241,7 @@
                         $c_lab = 0;
                         $p_lab = 0;
                         $tc = 0;
+                        $fine = 0;
                         foreach($payment_item as $item){
                             if($item['form_item_name']=='add_fee_nameadmission_fee'){
                                 $admission_fee = $item['item_amount'];
@@ -256,12 +258,16 @@
                             else if($item['form_item_name']=='add_fee_nametc'){
                                 $tc = $item['item_amount'];
                             }
+                            else if($item['form_item_name']=='fine'){
+                                $fine = $item['item_amount'];
+                            }
                         }
                         echo '<td>'.$evaluation_fee.'</td>';
                         echo '<td>'.$admission_fee.'</td>';
                         echo '<td>'.$c_lab.'</td>';
                         echo '<td>'.$p_lab.'</td>';
                         echo '<td>'.$tc.'</td>';
+                        echo '<td>'.$fine.'</td>';
                         //Printing out VAT and TOTAL
                         echo '<td>'.$payment['vat'].'</td>';
                         echo '<td>'.$payment['total_receivable'].'</td>';
@@ -277,6 +283,7 @@
                 //Printing bottom Final row
                 echo '
                     <tr>
+                        <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
@@ -328,6 +335,7 @@
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
+                        <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue">Total Payment</td>
                         <td style="font-weight:bold;color:blue">'.$total_payment.'</td>
                     </tr>
@@ -357,6 +365,7 @@
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
+                        <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue">Total Refund</td>
                         <td style="font-weight:bold;color:blue">'.$total_refund.'</td>
                     </tr>
@@ -364,6 +373,7 @@
 
                 echo '
                     <tr>
+                        <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
                         <td style="font-weight:bold;color:blue"></td>
@@ -470,11 +480,11 @@
 
                     {
                         "sExtends": "xls",
-                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
                     },
                     {
                         "sExtends": "pdf",
-                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+                        "mColumns": [0, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
                     },
                     {
                         "sExtends": "print",

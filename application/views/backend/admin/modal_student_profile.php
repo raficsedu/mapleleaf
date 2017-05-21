@@ -22,16 +22,43 @@
         padding-top: 30px;
         padding-bottom: 30px;
     }
+    .cp-studying th {
+        text-align: center !important;
+        font-size: 20px;
+    }
+
+    .right {
+        float: right !important;
+        width: 50% !important;
+        margin-top: 10%;
+    }
     .print_div{
-        width: 10%;
-        float: right;
+        width: 100%;
+        float: left;
     }
     .print_div a{
         font-size: 20px;
+        float: right;
+    }
+    #printme , #DivIdToPrint{
+        display: none;
+    }
+    @media print {
+        .page-container{
+            display: none;
+        }
+        #printme {
+            display: block;
+        }
+        h4{
+            padding: 0px;
+            margin: 3px 0px;
+        }
     }
 </style>
 <?php
 $edit_data		=	$this->db->get_where('student' , array('student_id' => $param2) )->result_array();
+$font_size = 'style="font-size : 19px;"';
 foreach ( $edit_data as $row):
     ?>
     <div class="row">
@@ -43,10 +70,10 @@ foreach ( $edit_data as $row):
             <?php echo get_phrase('student_profile');?>
         </div>
         <div class="print_div">
-            <a onclick="printDiv('printableArea')" href="javascript:void(0)"><i class="entypo-print"></i> Print</a>
+            <a onclick="printDiv('DivIdToPrint')" href="javascript:void(0)"><i class="entypo-print"></i> Print</a>
         </div>
     </div>
-    <div class="panel-body" id="printableArea">
+    <div class="panel-body">
 
     <?php echo form_open(base_url() . 'index.php?admin/student/'.$row['class_id'].'/do_update/'.$row['student_id'] , array('class' => 'form-horizontal form-groups-bordered validate', 'enctype' => 'multipart/form-data'));?>
 
@@ -126,7 +153,7 @@ foreach ( $edit_data as $row):
                 foreach($classes as $row2):
                     ?>
                     <option value="<?php echo $row2['class_id'];?>"
-                        <?php if($row['class_id'] == $row2['class_id'])echo 'selected';?>>
+                        <?php if($row['class_id'] == $row2['class_id']){echo 'selected';$class_name = $row2['name'];}?>>
                         <?php echo $row2['name'];?>
                     </option>
                 <?php
@@ -148,6 +175,7 @@ foreach ( $edit_data as $row):
                 foreach ($sections as $row2) {
                     if($row['section_id']==$row2['section_id']){
                         $selected = 'selected';
+                        $section_name = $row2['name'];
                     }else{
                         $selected = '';
                     }
@@ -247,10 +275,10 @@ foreach ( $edit_data as $row):
 
         <div class="col-sm-5">
             <select name="lab" class="form-control" id="lab" disabled>
-                <option value="1" <?php if($row['c_lab']==0 && $row['p_lab']==0)echo 'selected';?>>None</option>
-                <option value="2" <?php if($row['c_lab']>0 && $row['p_lab']==0)echo 'selected';?>>C Lab</option>
-                <option value="3" <?php if($row['c_lab']==0 && $row['p_lab']>0)echo 'selected';?>>P Lab</option>
-                <option value="4" <?php if($row['c_lab']>0 && $row['p_lab']>0)echo 'selected';?>>Both Lab</option>
+                <option value="1" <?php if($row['c_lab']==0 && $row['p_lab']==0){echo 'selected';$lab = 'None';}?>>None</option>
+                <option value="2" <?php if($row['c_lab']>0 && $row['p_lab']==0){echo 'selected';$lab = 'C Lab';}?>>C Lab</option>
+                <option value="3" <?php if($row['c_lab']==0 && $row['p_lab']>0){echo 'selected';$lab = 'P Lab';}?>>P Lab</option>
+                <option value="4" <?php if($row['c_lab']>0 && $row['p_lab']>0){echo 'selected';$lab = 'Both C and P Lab';}?>>Both Lab</option>
             </select>
         </div>
     </div>
@@ -269,11 +297,11 @@ foreach ( $edit_data as $row):
 
         <div class="col-sm-5 control-info">
             <select name="parent_status" id="parent_status" data-validate="required" class="form-control" disabled>
-                <option value="0" <?php if($row['parent_status']==0)echo 'selected';?>>Non Teacher</option>
-                <option value="1" <?php if($row['parent_status']==1)echo 'selected';?>>Teacher</option>
-                <option value="2" <?php if($row['parent_status']==2)echo 'selected';?>>Scholarship</option>
-                <option value="3" <?php if($row['parent_status']==3)echo 'selected';?>>Teacher + Scholarship</option>
-                <option value="4" <?php if($row['parent_status']==4)echo 'selected';?>>Special</option>
+                <option value="0" <?php if($row['parent_status']==0){echo 'selected';$student_type = 'Non Teacher';}?>>Non Teacher</option>
+                <option value="1" <?php if($row['parent_status']==1){echo 'selected';$student_type = 'Teacher';}?>>Teacher</option>
+                <option value="2" <?php if($row['parent_status']==2){echo 'selected';$student_type = 'Scholarship';}?>>Scholarship</option>
+                <option value="3" <?php if($row['parent_status']==3){echo 'selected';$student_type = 'Teacher + Scholarship';}?>>Teacher + Scholarship</option>
+                <option value="4" <?php if($row['parent_status']==4){echo 'selected';$student_type = 'Special';}?>>Special</option>
             </select>
         </div>
     </div>
@@ -318,9 +346,9 @@ foreach ( $edit_data as $row):
 
         <div class="col-sm-5 control-info">
             <select name="student_status" id="student_status" data-validate="required" class="form-control" disabled>
-                <option value="1" <?php if($row['active']==1)echo 'selected';?>>Current</option>
-                <option value="2" <?php if($row['active']==2)echo 'selected';?>>Old</option>
-                <option value="0" <?php if($row['active']==0)echo 'selected';?>>Alumni</option>
+                <option value="1" <?php if($row['active']==1){echo 'selected';$student_status = 'Current';}?>>Current</option>
+                <option value="2" <?php if($row['active']==2){echo 'selected';$student_status = 'Old';}?>>Old</option>
+                <option value="0" <?php if($row['active']==0){echo 'selected';$student_status = 'Alumni';}?>>Alumni</option>
             </select>
         </div>
     </div>
@@ -492,6 +520,7 @@ foreach ( $edit_data as $row):
                 foreach($buildings as $building):
                     if($building['id']==$row['building_info']){
                         $selected = 'selected';
+                        $building_name = $building['building_name'];
                     }else{
                         $selected = '';
                     }
@@ -516,6 +545,7 @@ foreach ( $edit_data as $row):
                 foreach($branchs as $branch):
                     if($branch['branch_id']==$row['branch_info']){
                         $selected = 'selected';
+                        $branch_name = $branch['branch_name'];
                     }else{
                         $selected = '';
                     }
@@ -603,6 +633,190 @@ foreach ( $edit_data as $row):
     </div>
     </div>
     </div>
+    </div>
+    <div id="DivIdToPrint">
+        <div style="width: 100%;float: left;">
+            <div style="width: 100%;float: left;">
+                <div style="width: 20%;float: left;margin-top: 1%;">
+                    <img src="<?php echo base_url().'assets/images/logo.png'?>" width="80px" height="80px">
+                </div>
+                <div style="width: 60%;float: left;">
+                    <h3 style="text-align: center;">MAPLE LEAF INTERNATIONAL SCHOOL</h3>
+                    <h4 style="text-align: center;">DHANMONDI , DHAKA</h4>
+                    <h4 style="text-align: center;">Central VAT Registered No : 19151048296</h4>
+                    <h4 style="text-align: center;">Area Code : 190403</h4>
+                </div>
+                <div style="width: 20%;float: left;margin-top: 7.5%;">
+                    <h4 style="text-align: right;">Session : <?php if($row['s_session']=='01'){echo 'January';}else{echo 'July';}?></h4>
+                    <h4 style="text-align: right;">Class : <?php echo $class_name; ?></h4>
+                    <h4 style="text-align: right;">Section : <?php echo $section_name; ?></h4>
+                </div>
+            </div>
+            <hr style="width: 100%;float: left;">
+            <div style="width: 100%;float: left;margin-top: 2%;">
+                <h2>Basic Information :</h2>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Student Name : <?php echo $row['name'];?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Student ID : <?php echo $row['roll'];?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Session : <?php if($row['s_session']=='01'){echo 'January';}else{echo 'July';}?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Year : <?php echo $row['year'];?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Gender : <?php echo $row['gender'];?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Phone : <?php echo $row['phone'];?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Present Address : <?php echo $row['present_address'];?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Permanent Address : <?php echo $row['parmanent_address'];?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Birthday : <?php echo $row['birthday'];?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Admission Date : <?php echo date('d/m/Y',strtotime($row['admission_date']));?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>SMS Number : <?php echo $row['sms_number'];?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Associated Lab : <?php echo $lab;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Student Type : <?php echo $student_type;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Student Status : <?php echo $student_status;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Branch : <?php echo $branch_name;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Building : <?php echo $building_name;?></h4>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;float: left;margin-top: 2%;">
+                <h2>Academic Fees :</h2>
+                <?php
+                $academic_fees = $this->db->get_where('academic_fees ' , array(
+                    'class_id' => $row['class_id'],
+                    'year' => $row['year']
+                ))->row();
+                ?>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Monthly Fee : <?php echo $fee = ($row['special_monthly_fee'] > 0) ? $row['special_monthly_fee'] : $academic_fees->mf;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Admission Fee : <?php echo $fee = ($row['special_admission_fee'] > 0) ? $row['special_admission_fee'] : $academic_fees->ad;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Evaluation Fee : <?php echo $fee = ($row['special_evaluation_fee'] > 0) ? $row['special_evaluation_fee'] : $academic_fees->ev;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>C Lab Fee : <?php echo $fee = ($row['special_c_lab_fee'] > 0) ? $row['special_c_lab_fee'] : $academic_fees->c_lab;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>P Lab Fee : <?php echo $fee = ($row['special_p_lab_fee'] > 0) ? $row['special_p_lab_fee'] : $academic_fees->p_lab;?></h4>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;float: left;margin-top: 2%;">
+                <h2>Parent Information :</h2>
+                <?php
+                $parent_info = $this->db->get_where('parent ' , array(
+                    'parent_id' => $row['parent_id']
+                ))->row();
+                ?>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h3>Father Information :</h3>
+                        <h4 <?php echo $font_size;?>>Name : <?php echo $parent_info->father_name;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h3>Mother Information :</h3>
+                        <h4 <?php echo $font_size;?>>Name : <?php echo $parent_info->mother_name;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Nationality : <?php echo $parent_info->father_nationality;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Nationality : <?php echo $parent_info->mother_nationality;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Occupation : <?php echo $this->crud_model->get_type_name_by_id('parent_occupation',$parent_info->father_occupation,'title');?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Occupation : <?php echo $this->crud_model->get_type_name_by_id('parent_occupation',$parent_info->mother_occupation,'title');?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Designation : <?php echo $parent_info->father_designation;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Designation : <?php echo $parent_info->mother_designation;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>TIN No : <?php echo $parent_info->father_tin;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>TIN No : <?php echo $parent_info->mother_tin;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>National ID No : <?php echo $parent_info->father_nid;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>National ID No : <?php echo $parent_info->mother_nid;?></h4>
+                    </div>
+                </div>
+                <div style="width: 100%;float: left;">
+                    <div style="width: 45%;float: left;">
+                        <h4 <?php echo $font_size;?>>Phone : <?php echo $parent_info->phone;?></h4>
+                    </div>
+                    <div style="width: 45%;float: left;margin-left: 10%;">
+                        <h4 <?php echo $font_size;?>>Address : <?php echo $parent_info->address;?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 <?php
@@ -744,14 +958,10 @@ function getbddate($date){
         $('#total').val(final_total);
     });
 
-    function printDiv(divName) {
-        var printContents = document.getElementById(divName).innerHTML;
-        var originalContents = document.body.innerHTML;
-
-        document.body.innerHTML = printContents;
-
+    function printDiv(print) {
+        var print_content = $('#'+print).html();
+        $("#printme").html(print_content);
         window.print();
-
-        document.body.innerHTML = originalContents;
+        $("#printme").html("");
     }
 </script>
